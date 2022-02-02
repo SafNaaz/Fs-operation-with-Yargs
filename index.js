@@ -4,49 +4,61 @@ const readline = require("readline");
 
 function ifFileExists(fileName) {
   return new Promise((resolve, reject) => {
-    fs.readFile("array.txt", function (err, data) {
+    fs.readFile("array.txt", function (err, arrayData) {
       if (err) {
-        let content = fileName;
-        content += "\n";
-        fs.writeFile("array.txt", content, (error) => {
-          if (error) {
-            console.log("Error occured");
-          }
-          rl.close();
-          resolve("created");
-        });
+        if (err.code === "ENOENT") {
+          handleWhenArrayFileNotFound(reject, resolve);
+        } else {
+          reject("file read error");
+        }
       }
 
-      if (data) {
-        var array = data.toString().split("\n");
-        let present = array.includes(fileName);
-        if (present) {
-          askForNewName(
-            "File already exists, Please provide a new filename:=>"
-          );
-        } else {
-          resolve(false);
-        }
+      if (arrayData) {
+        handleWhenArrayExists(arrayData, resolve, fileName);
       }
     });
   });
+
+  function handleWhenArrayFileNotFound(reject, resolve) {
+    let content = fileName;
+    content += "\n";
+    fs.writeFile("array.txt", content, (error) => {
+      if (error) {
+        console.log("Error occured");
+        reject("file write error");
+      }
+      rl.close();
+      resolve("created");
+    });
+  }
+
+  function handleWhenArrayExists(arrayData, resolve, fileName) {
+    if (fileNamePresentInArray(arrayData, fileName)) {
+      askForNewName("File already exists, Please provide a new filename:=>");
+    } else {
+      resolve("create file");
+    }
+  }
+}
+
+function fileNamePresentInArray(arrayData, fileName) {
+  var array = arrayData.toString().split("\n");
+  return array.includes(fileName);
 }
 
 const rl = readline.createInterface({
   input: process.stdin,
-  output: process.stdout,
+  output: process.stdout, 
 });
 
 function askForNewName(message) {
   rl.question(message, (fileName) => {
-    fs.readFile("array.txt", function (err, data) {
+    fs.readFile("array.txt", function (err, arrayData) {
       if (err) {
         console.log("array.txt not found");
       }
-      if (data) {
-        var array = data.toString().split("\n");
-        let present = array.includes(fileName);
-        if (present) {
+      if (arrayData) {
+        if (fileNamePresentInArray(arrayData, fileName)) {
           askForNewName(
             "File already exists, Please provide a new filename:=>"
           );
@@ -62,8 +74,8 @@ function askForNewName(message) {
 function askForUserInput(message) {
   rl.question(message, (fileName) => {
     ifFileExists(fileName)
-      .then((data) => {
-        writeToFile(fileName, data);
+      .then((res) => {
+        writeToFile(fileName, res);
       })
       .catch((err) => {
         console.log(err);
