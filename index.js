@@ -14,7 +14,7 @@ function ifFileExists(fileName) {
       }
 
       if (arrayData) {
-        handleWhenArrayExists(arrayData, resolve, fileName);
+        handleWhenArrayExists(arrayData, resolve);
       }
     });
   });
@@ -32,7 +32,7 @@ function ifFileExists(fileName) {
     });
   }
 
-  function handleWhenArrayExists(arrayData, resolve, fileName) {
+  function handleWhenArrayExists(arrayData, resolve) {
     if (fileNamePresentInArray(arrayData, fileName)) {
       askForNewName("File already exists, Please provide a new filename:=>");
     } else {
