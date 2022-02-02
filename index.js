@@ -2,12 +2,14 @@ const argv = require("yargs").argv;
 const fs = require("fs");
 const readline = require("readline");
 
-function ifFileExists(filepath) {
+function ifFileExists(fileName) {
   return new Promise((resolve, reject) => {
     fs.readFile("array.txt", function (err, data) {
       if (err) {
-        fs.writeFile("array.txt", (filepath += "\n"), (err) => {
-          if (err) {
+        let content = fileName;
+        content += "\n";
+        fs.writeFile("array.txt", content, (error) => {
+          if (error) {
             console.log("Error occured");
           }
           rl.close();
@@ -17,7 +19,7 @@ function ifFileExists(filepath) {
 
       if (data) {
         var array = data.toString().split("\n");
-        let present = array.includes(filepath);
+        let present = array.includes(fileName);
         if (present) {
           askForNewName(
             "File already exists, Please provide a new filename:=>"
